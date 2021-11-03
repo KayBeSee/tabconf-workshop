@@ -1,36 +1,48 @@
-import { BIP32Interface } from "bip32";
-import { payments, Psbt, bip32 } from "bitcoinjs-lib";
+import { generateMnemonic, mnemonicToSeed } from "bip39";
+import { BIP32Interface, fromSeed } from "bip32";
+import { payments, Psbt, bip32, networks } from "bitcoinjs-lib";
 
 import { Address, DecoratedUtxo } from "src/types";
 
 export const getNewMnemonic = (): string => {
-  throw new Error("Function not implemented yet");
+  const mnemonic = generateMnemonic(256);
+  return mnemonic;
 };
 
 export const getMasterPrivateKey = async (
   mnemonic: string
 ): Promise<BIP32Interface> => {
-  throw new Error("Function not implemented yet");
+  const seed = await mnemonicToSeed(mnemonic);
+  const privateKey = fromSeed(seed, networks.bitcoin);
+  return privateKey;
 };
 
 export const getXpubFromPrivateKey = (
   privateKey: BIP32Interface,
   derivationPath: string
 ): string => {
-  throw new Error("Function not implemented yet");
+  const child = privateKey.derivePath(derivationPath).neutered();
+  const xpub = child.toBase58();
+  return xpub;
 };
 
 export const deriveChildPublicKey = (
   xpub: string,
   derivationPath: string
 ): BIP32Interface => {
-  throw new Error("Function not implemented yet");
+  const node = bip32.fromBase58(xpub, networks.bitcoin);
+  const child = node.derivePath(derivationPath);
+  return child;
 };
 
 export const getAddressFromChildPubkey = (
   child: bip32.BIP32Interface
 ): payments.Payment => {
-  throw new Error("Function not implemented yet");
+  const address = payments.p2wpkh({
+    pubkey: child.publicKey,
+    network: networks.bitcoin,
+  });
+  return address;
 };
 
 export const createTransasction = async (
